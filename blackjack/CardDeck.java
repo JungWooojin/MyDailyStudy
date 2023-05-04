@@ -25,10 +25,11 @@ public class CardDeck {
 
     private int getRandomIdx(){
         return (int)(Math.random()*cardList.size());// 카드갯수중 랜덤으로 픽해서 리턴해라
+
     }
 
     public  Card getCard(){
-        return cardList.remove(getRandomIdx());
+        return  cardList.remove(getRandomIdx());
     }
 
     private String getDenomination(int num){

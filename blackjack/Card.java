@@ -13,6 +13,11 @@ public class Card {
     public String getDenomination() {
         return DENOMINAUTION;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Card { %s , %s }",this.PATTERN,this.DENOMINAUTION);
+    }
 }
 
 
