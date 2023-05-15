@@ -1,0 +1,183 @@
+-- 5월15일
+
+-- 가장 나중에 가입한 고객의 pk,이름,성
+
+SELECT max(customer_id),first_name,last_name -- pk값이 제일 큰거 
+FROM customer ;
+
+
+SELECT customer_id,first_name,last_name
+FROM customer
+ORDER BY customer_id DESC
+LIMIT 1;
+
+
+SELECT customer_id,first_name,last_name
+FROM customer
+WHERE customer_id = (
+	SELECT MAX(customer_id)
+	FROM customer
+);
+
+
+-- 도시id, 도시명 > India(인도)가 아닌 나라들의 도시id, 도시명
+SELECT city_id, city
+FROM city a 
+JOIN country b
+ON a.country_id=b.country_id
+WHERE b.country != 'India'; -- 스칼라값(1)이라면 !=도 사용 가능하다. 
+
+
+SELECT city_id, city
+FROM city 
+WHERE country_id in(
+		SELECT country_id
+		FROM country
+		WHERE country_id != 44
+); -- 스칼라값(1)이라면 !=도 사용 가능하다. 
+
+-- 서브쿼리 값을 먼저 생성후 그다음에 ()를 덮어 씌워주는 방법도 있다.
+
+-- Canada,Mexico의 도시id, 도시명을 출력.
+SELECT city_id,city
+FROM city a
+JOIN country b
+ON a.country_id=b.country_id
+WHERE b.country IN ('Canada','Mexico');
+
+SELECT city_id,city
+FROM city
+WHERE country_id  IN( SELECT country_id
+							FROM country
+							WHERE country IN ('Canada','Mexico')
+); 
+
+-- all 연산자
+SELECT *
+FROM customer
+WHERE customer_id !=ALL( -- 전부다 false값이여야만 
+			SELECT customer_id
+			FROM payment
+			WHERE amount = 0
+);
+
+-- United States, Maxico, Canad에 거주하는 소비자의 렌탈 횟수보다 많이
+-- 렌탈한 사람들의 고객 id, 횟수
+
+SELECT customer_id, COUNT(customer_id)
+FROM rental
+GROUP BY customer_id
+HAVING COUNT(customer_id)>ALL( -- all은 and 이고 any는 or이다.
+SELECT COUNT(customer_id) FROM rental
+WHERE customer_id IN (
+   SELECT customer_id FROM customer
+   WHERE address_id in
+   (
+      SELECT address_id FROM address
+      WHERE city_id IN (
+         SELECT city_id
+         FROM city
+         WHERE country_id IN (
+            SELECT country_id FROM country
+            WHERE country IN ('United States', 'Mexico', 'Canada')
+         )
+      )
+   )
+)
+GROUP BY customer_id);
+
+
+
+SELECT *
+FROM city
+WHERE country_id in(
+SELECT country_id
+FROM country
+WHERE country IN ('United States','Mexico','Canada')
+);
+
+
+
+-- 배우 성이 'MONROE' 인 사람이 PG 영화등급에 출연했다. 배우 ID, 영화 ID가 궁금하다.
+SELECT *
+FROM actor  a
+JOIN film_actor b
+ON a.actor_id = b.actor_id
+INNER JOIN film c
+ON b.film_id = c. film_id
+WHERE a.LAST_name = 'MONROE' AND c.rating = 'PG';
+
+SELECT * FROM actor
+WHERE ( first_name , last_name) IN
+	(
+	SELECT first_name,last_name
+	FROM actor
+	WHERE last_name = 'MONROE'
+	);
+
+-- case문
+select	
+	customer_id,
+	active,
+	case
+		When active = 1
+		Then '활성화'
+		ELSE '비활성화'
+	END AS active_str 
+	,if ( active=1,'활성화','비활성화') AS active_Str2
+FROM customer;
+
+
+
+-- PG,G 전체  이용, NC-17 17세이상 , PG-13 13세 이상, R은 청소년관람불과  
+SELECT *,
+	CASE WHEN RATING IN ('PG','G') THEN '전체이용'
+		  WHEN RATING = 'NC-17' THEN '17세 이상'
+		  WHEN RATING = 'PG-13' THEN '13세 이상'
+		  ELSE '청소년관람불가'
+	END rating_str	  
+FROM film;
+
+
+SELECT *,
+case rating when 'PG' THEN '전체이용'
+				WHEN 'G' THEN '전체이용'
+				WHEN 'NC-17' THEN'17세이상'
+				WHEN 'PG-13' THEN'13세이상'
+		ELSE '청소년관람불가'
+		END rating_star
+FROM film;
+					
+-- first_name / Last_name / num_rentals (active = 0 > 0 )
+
+SELECT first_name,Last_name,
+	case active when '0' then '0'	
+					else COUNT(1)
+	end num_rentals, ACTIVE
+FROM customer a
+JOIN rental b
+ON b.customer_id=a.customer_id 
+GROUP BY a.customer_id 
+;
+	 
+	
+-- rental 테이블에서 각 달의 렌탈수 출력
+SELECT date_format(rental_date,'%Y-%m') mon,COUNT(rental_Date) cnt
+FROM rental
+WHERE  DATE_FORMAT(rental_Date,'%Y-%m') BETWEEN '2005-05' AND '2005-07'  
+GROUP BY mon ;
+
+
+SELECT 
+SUM(
+	case DATE_FORMAT(rental_Date,'%Y-%m') when '2005-05' then 1 ELSE 0 end
+) may_retntals,
+SUM(
+	case DATE_FORMAT(rental_Date,'%Y-%m') when '2005-06' then 1 ELSE 0 end
+) jun_retntals,
+SUM(
+	case DATE_FORMAT(rental_Date,'%Y-%m') when '2005-07' then 1 ELSE 0 end
+) july_retntals
+FROM rental
+WHERE  DATE_FORMAT(rental_Date,'%Y-%m') BETWEEN '2005-05' AND '2005-07';
+
