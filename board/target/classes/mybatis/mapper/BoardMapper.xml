@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.green.board.BoardMapper">
+        <insert id="insBoard">
+        insert into t_board
+        (title,ctnt,writer)
+        values
+        (#{title},#{ctnt},#{writer}) <!--# =문자열사이에 문자내용을 삽입하겠다 문자열이면 홑따옴표를 자동입력 숫자면 자동제외 ㅁㅊ다-->
+        </insert>
+        <select id="selBoardAll" resultType="BoardEntity">
+                select
+                        iboard, title, writer
+                        ,created_at createdAt, updated_at updatedAt
+                From t_board
+        </select>
+        <select id="selBoardById" resultType="BoardEntity">
+                select
+                iboard, title, writer, ctnt
+                ,created_at createdAt, updated_at updatedAt
+                from t_board
+                where iboard = #{iboard}
+        </select>
+
+
+<update id="updBoard">
+UPDATE t_board
+        SET title =#{title}
+        ,ctnt =#{ctnt}
+        ,writer =#{writer}
+        ,updated_at = current_timestamp()
+        WHERE iboard =#{iboard}
+</update>
+<delete id="delBoard">
+        DELETE
+        FROM t_board
+        WHERE iboard = #{iboard}
+</delete>
+
+</mapper>
