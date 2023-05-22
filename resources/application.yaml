@@ -1,0 +1,14 @@
+# db config
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/board?characterEncoding=UTF-8&serverTimezone=UTC #DB?
+    username: root
+    password: green502
+  # tab ??? .? ???? 2?? ???? ???.
+
+
+ # mybatis config
+mybatis:
+  type-aliases-package: com.example.board7 #????
+  mapper-locations: mapper/**/*.xml #????? ????
