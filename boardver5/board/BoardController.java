@@ -1,6 +1,7 @@
 package com.green.boardver5.board;
 
 import com.green.boardver5.board.model.*;
+import com.green.boardver5.cmt.model.CmtSelDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,16 +32,28 @@ public class BoardController {
         dto.setPage(page);
         return service.selboard(dto);
     }
+
+
+
+
     @DeleteMapping
-    public int boardDel(@RequestParam int iboard,@RequestParam int iuser){
+    public int boardDel(@RequestParam int iboard,@RequestParam int iuser)throws Exception{
         BoardDelDto dto = new BoardDelDto();
         dto.setIboard(iboard);
-        dto.setIuer(iuser);
+        dto.setIuser(iuser);
         return service.delBoard(dto);
     }
+
+    @GetMapping("/{iboard}")
+    public BoardDetailCmtVo getBoardDetailById(@PathVariable int iboard){
+        BoardiboardDto dto = new BoardiboardDto();
+        dto.setIboard(iboard);
+        return service.boardDetailById(dto);
+    }
+
     @GetMapping("/maxpage")
     public int getMaxPage(@RequestParam int row){
         return service.selrowMaxPage(row);
     }
-
 }
+
