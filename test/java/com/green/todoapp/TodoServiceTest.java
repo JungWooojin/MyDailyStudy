@@ -1,9 +1,6 @@
 package com.green.todoapp;
 
-import com.green.todoapp.model.TodoEntity;
-import com.green.todoapp.model.TodoInsDto;
-import com.green.todoapp.model.TodoSelDto;
-import com.green.todoapp.model.TodoSelVo;
+import com.green.todoapp.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,11 +58,37 @@ class TodoServiceTest {
 
         //then
         assertEquals(list,mockList);
-
         verify(mapper).selTodo();
 
+    }
+    @Test
+    @DisplayName("TodoService - Todo 완료처리 토글")
+    void updFinish(){
+        //GIVEN
+        TodoFinishDto dto =new TodoFinishDto();
+        dto.setItodo(1);
+        //when
+        when(mapper.updFinish(any(TodoEntity.class))).thenReturn(0);
+        int result= service.updFinish(dto); // 서비스에서 리턴때릴때 경우에따라 값이 달라지는데  upd같은경우는 0일때 -1이 출려되어야 하므로 덴리턴값에 0을줄경우 aseertEquals 는 -1을 줘서 결과를 비교해야한다.
 
-
+        assertEquals(-1,result);
+        verify(mapper).updFinish(any());
 
     }
+    @Test
+    @DisplayName("TodoService - Todo 삭제완료")
+    void delTodo(){
+        TodoITodoDto dto = new TodoITodoDto();
+        dto.setItodo(1);
+   int expectedResult = 1;
+        when(mapper.delTodo(any(TodoITodoDto.class))).thenReturn(expectedResult);
+        int result = service.delTodo(dto);
+
+        assertEquals(expectedResult,result);
+        verify(mapper).delTodo(any());
+    }
+//return 잘떄리는지
+//anyint 랜덤한 인트값 생성
+
+
 }

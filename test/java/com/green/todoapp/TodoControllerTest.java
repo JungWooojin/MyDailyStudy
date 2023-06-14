@@ -1,7 +1,10 @@
 package com.green.todoapp;
 
+import com.google.gson.Gson;
+import com.green.todoapp.model.TodoITodoDto;
 import com.green.todoapp.model.TodoInsDto;
 import com.green.todoapp.model.TodoSelVo;
+import com.green.todoapp.model.TodoUpdDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +46,12 @@ class TodoControllerTest {
         given(service.insTodo(any(TodoInsDto.class))).willReturn(3);//service.insDto요청이 들어오면  TodoInsDto에 있는 값 아무거나가 들어가게 된다 any()로 인해서 그러나 willReturn으로 무조건 3으로 리턴해준다. 잘작성했는지 검증하기 위함 가짜서비스만듬
 
         //when -실제 실행
+        TodoInsDto dto = new TodoInsDto();
+        dto.setCtnt("빨래 개기");
 
-        String json = "{ \"ctnt\": \"빨래 개기\" }";
-
+        Gson gson = new Gson();
+        //String json = "{ \"ctnt\": \"빨래 개기\" }";
+        String json = gson.toJson(dto);
         ResultActions ra = mvc.perform(post("/api/todo") //응답
                 .content(json)
                 .contentType(MediaType.APPLICATION_JSON));
@@ -63,8 +69,8 @@ class TodoControllerTest {
     void getTodo() throws Exception {
         //given -when -then
         List<TodoSelVo> mockList = new ArrayList<>();
-        mockList.add(new TodoSelVo(1, "테스트", "2023", null));
-        mockList.add(new TodoSelVo(2, "테스트2", "2022", "abc.jpg"));
+        mockList.add(new TodoSelVo(1, "테스트", "2023", null, 1, "2023-5-11"));
+        mockList.add(new TodoSelVo(2, "테스트2", "2022", "abc.jpg", 0, "2023-5-12"));
         given(service.selTodo()).willReturn(mockList);
 
 
@@ -82,4 +88,44 @@ class TodoControllerTest {
         verify(service).selTodo();
     }
 
+    @Test
+    @DisplayName("TODO - 완료처리 토글")
+    void patchTodo() throws Exception {
+        given(service.updFinish(any())).willReturn(1);
+
+        TodoUpdDto dto = new TodoUpdDto();
+        dto.setItodo(1);
+
+        Gson gson = new Gson();
+        String json = gson.toJson(dto); // json에다가 제이슨형태로 바꿔줄래 ~ 해주는 거
+        // itodo : 1
+        ResultActions ra = mvc.perform(patch("/api/todo").
+                content(json).
+                contentType(MediaType.APPLICATION_JSON));
+
+
+         ra.andExpect(status().isOk())
+                .andExpect(content().string("1"))
+                .andDo(print());
+        verify(service).updFinish(any());
+
+    }
+    @Test
+    @DisplayName("TODO - 삭제완료")
+    void delTodo() throws Exception{
+        given(service.delTodo(any(TodoITodoDto.class))).willReturn(300); //무조건 300뱉어라 service.delTodo에 어떤값을넣든
+        TodoITodoDto dto = new TodoITodoDto();
+        dto.setItodo(1);
+
+
+        ResultActions ra = mvc.perform(delete("/api/todo") //응답
+                        .param("itodo","1"));
+                    ra.andExpect(status().isOk())
+                 .andExpect(content().string("300")) // 통신이 실제로 되고있는지 확인하는데 요청을 보내는데 요청보낸결과가 실제로 300인지 확인 ,윌리턴값으로 준값이 스트링값과 일치할경우  테스트 성공을 나타내준다.
+                    .andDo(print());
+                    verify(service).delTodo(any());
+
+    }
+
+//작동잘되는지 , any는 객체타입만가능 anyint anydouble 등등..
 }
