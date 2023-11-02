@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LandArchiveDAO" >
+<typeAlias  alias="LandArchiveSelectVo" type="component.landArchive.service.LandArchiveSelectVo"/>	
+<sqlMap namespace="LandArchiveDAO">
+	<typeAlias  alias="LandArchiveSearchVO" 	type="landArchive.service.LandArchiveSearchVO"/>
+	<typeAlias  alias="LandArchiveResultVO" 	type="landArchive.service.LandArchiveResultVO"/>
+	<typeAlias  alias="LandArchiveResultCatVO" 	type="landArchive.service.LandArchiveResultCatVO"/>	
+	<typeAlias  alias="LandArchiveResultItemVO" type="landArchive.service.LandArchiveResultItemVO"/>	
+	 
+	<!--  -->
+	<resultMap id="LandArchiveResultResult" class="LandArchiveResultVO" groupBy="hjdon_name,jibun">
+		<result property="hjdon_name" 		column="hjdon_name"/>
+		<result property="jibun" 			column="jibun"/>
+    	<result property="landArchiveResultCatList"	resultMap="LandArchiveDAO.LandArchiveResultCatResult" />
+	</resultMap>
+	
+	<resultMap id="LandArchiveResultCatResult" class="LandArchiveResultCatVO" groupBy="cat1">
+		<result property="cat1" 						column="cat1"/>
+		<result property="landArchiveResultItemList"  	resultMap="LandArchiveDAO.LandArchiveResultItemResult" />
+	</resultMap>
+ 
+	<resultMap id="LandArchiveResultItemResult" class="LandArchiveResultItemVO">
+		<result property="cat2" 		column="cat2"/>
+		<result property="cat3" 		column="cat3"/>
+		<result property="file_name" 	column="file_name"/>
+	</resultMap>
+
+<select id ="LandArchiveDAO.selectLandArchiveList" parameterClass="LandArchiveSelectVo" resultClass="LandArchiveSelectResultVo">
+		 select * from( 
+		 <isEqual property="kind" compareValue="면적측정부">
+		 SELECT DISTINCT af_hjdon_name AS hjdon_name,af_jibun_dsp as JIBUN, '면적측정부' AS CAT1 , '면적측정부' AS CAT2 , '면적측정부' AS CAT3 FROM dj_area
+		 </isEqual>
+		 <isEqual property="kind" compareValue="지적도">
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp  as JIBUN,'지적도' AS CAT1 , substring(path_name,6,5) AS CAT2 , KIND_NAME AS CAT3 FROM dj_cadamap 
+		 </isEqual>
+		 <isEqual property="kind" compareValue="수지지적부">
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'수지지적부' AS CAT1 , '수지지적부' AS CAT2 , '수지지적부' AS CAT3 FROM dj_figure
+		 </isEqual>
+		 <isEqual property="kind" compareValue="토지조사부">
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'토지조사부' AS CAT1 , substring(path_name,6,5) AS CAT2 , KIND_NAME AS CAT3 FROM dj_landjosa
+		 </isEqual>
+		 <isEqual property="kind" compareValue="이동지결의서">
+		 SELECT DISTINCT af_hjdon_name AS hjdon_name,af_jibun_dsp  as JIBUN,'이동지결의서' AS CAT1 , substring(path_name,6,6) AS CAT2 , KIND_NAME AS CAT3 FROM dj_landmove
+		 </isEqual>
+		 <<isEqual property="kind" compareValue="측량결과도">
+				SELECT DISTINCT sub.bf_hjdon_name as hjdon_name, af_jibun_dsp  as JIBUN, '측량결과도' CAT1, substring(path_name,6,5) CAT2, KIND_NAME CAT3,  FROM dj_measure MS
+					JOIN DJ_MEASURE_SUB SUB ON MS.ROLL_NO = SUB.ROLL_NO AND MS.FRAME_NO = SUB.FRAME_NO AND MS.SR_NO = SUB.SR_NO
+			</isEqual>	
+		 <!--  <isEqual property="kind" compareValue="비법인"> 주소가 없음 -->
+		 <!-- SELECT DISTINCT regist_name as  hjdon_name  ,'비법인' AS CAT1 , substring(path_name,6,3) AS CAT2 , KIND_NAME AS CAT3 FROM dj_nocorp-->
+		 <!-- </isEqual>-->
+		 <isEqual property="kind" compareValue="지적재조사">
+		 SELECT DISTINCT af_hjdon_name AS hjdon_name,af_jibun_dsp  as JIBUN,'지적재조사' AS CAT1 ,substring(path_name,6,5)  AS CAT2 , KIND_NAME AS CAT3 FROM dj_reexamine
+		 </isEqual>
+		 <isEqual property="kind" compareValue="특별조치법">
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'특별조치법' AS CAT1 , substring(path_name,6,5)  AS CAT2 , KIND_NAME AS CAT3 FROM dj_spms
+		 UNION ALL SELECT DISTINCT  HJDON_NAME	hjdon_name, jibun_dsp as JIBUN, '특별조치법' CAT1, substring(path_name,6,5) CAT2, KIND_NAME CAT3, FROM dj_spms_m
+		 </isEqual>
+		 <isEqual property="kind" compareValue="도근측량부">
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'도근측량부' AS CAT1 , substring(path_name,6,5)  AS CAT2 , KIND_NAME AS CAT3 FROM dj_topographic
+		 </isEqual>
+		 <isEqual property="kind" compareValue="구토지대장">
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'구토지대장' AS CAT1 , substring(path_name,6,3) AS CAT2 , KIND_NAME AS CAT3 FROM ms_data
+		 </isEqual>
+		 <isEqual property="kind" compareValue="토지대장">
+		 SELECT DISTINCT concat(SPLIT_PART(rqst_text,' ',3),' ',SPLIT_PART(rqst_text,' ',4),' ', SPLIT_PART(rqst_text,' ',5)) AS hjdon_name ,'토지대장' AS CAT1,SPLIT_PART(rqst_text,' ',1) FROM ms_rqst
+		 </isEqual>
+		 <isEmpty property="kind">
+				SELECT DISTINCT af_hjdon_name  AS hjdon_name,af_jibun_dsp as JIBUN, '면적측정부' AS CAT1 , '면적측정부' AS CAT2 , '면적측정부' AS CAT3 FROM dj_area UNION ALL
+		 SELECT DISTINCT hjdon_name  AS hjdon_name,jibun_dsp  as JIBUN,'지적도' AS CAT1 , substring(path_name,6,5) AS CAT2 , KIND_NAME AS CAT3 FROM dj_cadamap UNION ALL 
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'수지지적부' AS CAT1 , '수지지적부' AS CAT2 , '수지지적부' AS CAT3 FROM dj_figure UNION ALL
+		 SELECT DISTINCT hjdon_name AS hjdon_name,jibun_dsp as JIBUN,'토지조사부' AS CAT1 , substring(path_name,6,5) AS CAT2 , KIND_NAME AS CAT3 FROM dj_landjosa UNION ALL
+		 SELECT DISTINCT af_hjdon_name AS hjdon_name,af_jibun_dsp  as JIBUN,'이동지결의서' AS CAT1 , substring(path_name,6,6) AS CAT2 , KIND_NAME AS CAT3 FROM dj_landmove UNION ALL
+	    SELECT DISTINCT  af_hjdon_name  as hjdon_name ,af_jibun_dsp  as JIBUN, '측량결과도' CAT1, substring(path_name,6,5) CAT2, KIND_NAME CAT3 from dj_measure MS
+				JOIN DJ_MEASURE_SUB SUB ON MS.ROLL_NO = SUB.ROLL_NO AND MS.FRAME_NO = SUB.FRAME_NO AND MS.SR_NO = SUB.SR_NO UNION ALL
+		 SELECT DISTINCT af_hjdon_name  AS hjdon_name,af_jibun_dsp  as JIBUN,'지적재조사' AS CAT1 ,substring(path_name,6,5)  AS CAT2 , KIND_NAME AS CAT3 FROM dj_reexamine UNION all
+		 SELECT DISTINCT hjdon_name  AS hjdon_name, jibun_dsp as JIBUN,'특별조치법' AS CAT1 , substring(path_name,6,5)  AS CAT2 , KIND_NAME AS CAT3 from dj_spms UNION ALL
+		  SELECT DISTINCT hjdon_name  as hjdon_name, jibun_dsp as JIBUN, '특별조치법' CAT1, substring(path_name,6,5) CAT2, KIND_NAME CAT3 FROM dj_spms_m UNION all 		  
+		  SELECT DISTINCT hjdon_name  AS hjdon_name,jibun_dsp as JIBUN,'도근측량부' AS CAT1 , substring(path_name,6,5)  AS CAT2 , KIND_NAME AS CAT3 FROM dj_topographic UNION ALL
+	 	SELECT DISTINCT hjdon_name  AS hjdon_name,jibun_dsp as JIBUN,'구토지대장' AS CAT1 , substring(path_name,6,3) AS CAT2 , KIND_NAME AS CAT3 FROM ms_data 
+			 SELECT DISTINCT concat(SPLIT_PART(rqst_text,' ',3),' ',SPLIT_PART(rqst_text,' ',4),' ', SPLIT_PART(rqst_text,' ',5)) AS hjdon_name ,'토지대장' AS CAT1,SPLIT_PART(rqst_text,' ',1) as CAT2,SPLIT_PART(rqst_text,' ',1) as CAT3 FROM ms_rqst<!-- 타입갯수 얘만 맞추면 다 될거임 -->
+			</isEmpty>
+		 ) 
+		 where hjdon_name !='' AND CAT1!='' 
+		<isNotEmpty property="address">
+			AND (hjdon_name LIKE '%'||#address#||'%' OR hjdon_name LIKE '%'||REPLACE(#address#,' ','')||'%') 
+		</isNotEmpty>
+			<isNotEmpty property="jibun_fst">
+				<isNotEmpty property="jibun_fst">	
+					AND JIBUN LIKE #jibun_fst#||'-'||#jibun_snd#||'%'
+				</isNotEmpty>
+				<isEmpty property="jibun_snd">
+					AND JIBUN LIKE #jibun_fst#||'%'
+				</isEmpty>
+			</isNotEmpty>
+			<isEmpty property="jibun_fst">
+				<isNotEmpty property="jibun_snd">	 
+					AND JIBUN LIKE '%'||'-'||#jibun_snd#||'%'
+				</isNotEmpty>
+		</isEmpty>
+		ORDER BY hjdon_name, CAT1, CAT3
+</select>
+<!-- DJ_AREA -->
+	<select id="LandArchiveDAO.selectAreaList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT  
+			'면적측정부' "문서종류", 
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"SUBMIT_DATE" "승인날짜", 
+			"BF_HJDON_NAME" || ' '|| "BF_JIBUN_DSP" "종전 지번", 
+			"AF_HJDON_NAME" || ' '|| "AF_JIBUN_DSP" "환지 지번", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명"
+			FROM "DJ_AREA"
+			WHERE "FILE_NAME" = #file_name#
+	</select> 
+	
+	<!-- DJ_CADAMAP -->
+	<select id="LandArchiveDAO.selectCadaMapList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			"KIND_NAME" "문서종류", 
+			"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+			"POS_X" "X좌표", 
+			"POS_Y" "Y좌표", 
+			"DOHO" "도면번호", 
+			"DOHO_SUB" "도면번호_부번", 
+			"SCALE" "축척", 
+			reverse(split_part(reverse("PATH_NAME"), '\', 1)) "파일명",
+			"PATH_NAME" "파일경로"
+		FROM "DJ_CADAMAP"
+		WHERE "PATH_NAME" LIKE  '%'||#file_name#||'%' 
+	</select>
+	
+	<!-- DJ_HWANJI_IMAGE -->
+	<select id="LandArchiveDAO.selectHwanjiList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			IMG."KIND_NAME" "문서종류", 
+			IMG."KWON_NO" "권번호", 
+			IMG."PAGE_NO" "페이지번호", 
+			JB."SR_NO" "시리얼번호", 
+			JB."JIGU_NAME" "지구명", 
+			"BF_HJDON_NAME" || ' '|| "BF_JIBUN_DSP" "종전 지번", 
+			"AF_HJDON_NAME" || ' '|| "AF_JIBUN_DSP" "환지 지번", 
+			"WORK_YEAR" "작업년도", 
+			"SAUP_SDATE" "사업시작", 
+			"SAUP_EDATE" "사업종료", 
+			"JIGU_SAUPJA" "사업자",
+			IMG."PATH_NAME" "파일경로",
+			IMG."FILE_NAME" "파일명"
+		FROM  "DJ_HWANJI_IMAGE" IMG
+		JOIN "DJ_HWANJI_JIBUN" JB ON IMG."KWON_NO" = JB."KWON_NO" AND IMG."PAGE_NO" = JB."PAGE_NO"
+		JOIN "DJ_HWANJI_JIGU" JG ON JG."JIGU_CODE"  = JB."JIGU_CODE" 
+		WHERE "FILE_NAME"= #file_name#
+	</select>	
+		
+	<!-- DJ_LANDJOSA -->
+	<select id="LandArchiveDAO.selectLandJosaList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			"KIND_NAME" "문서종류", 
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명"
+		FROM "DJ_LANDJOSA"
+			WHERE "FILE_NAME"= #file_name#
+	</select>
+	
+	<!-- DJ_LANDMOVE-->
+	<select id="LandArchiveDAO.selecLandMovetList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			"KIND_NAME" "문서종류",
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"SUBMIT_DATE" "승인날짜", 
+			"TYPE_NAME" "변경타입", 
+			"BF_HJDON_NAME" || ' '|| "BF_JIBUN_DSP" "종전 지번", 
+			"AF_HJDON_NAME" || ' '|| "AF_JIBUN_DSP" "이동지 지번", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명"
+		FROM "DJ_LANDMOVE" LM
+			JOIN "CD_TYPE" TP ON LM."MEASURE_TYPE" = TP."TYPE_CODE" 
+			WHERE "FILE_NAME"= #file_name#
+	</select>
+	
+	<!-- DJ_MEASURE-->
+	<select id="LandArchiveDAO.selectMeasureList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			"KIND_NAME" "문서종류",
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"YEAR" "수행년도", 
+			"DOHO" "도호", 
+			"DOHO_SUB" "도호부번", 
+			"SCALE" "축척", 
+			MS."SUBMIT_DATE" "승인날짜", 
+			"MEASURE_DATE" "측량날짜", 
+			"BF_HJDON_NAME" || ' '|| "BF_JIBUN_DSP" "종전 지번", 
+			"AF_HJDON_NAME" || ' '|| "AF_JIBUN_DSP" "측량후 지번", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명"
+		FROM "DJ_MEASURE"  MS
+			JOIN "DJ_MEASURE_SUB" SUB ON MS."ROLL_NO" = SUB."ROLL_NO" AND MS."FRAME_NO" = SUB."FRAME_NO" AND MS."SR_NO" = SUB."SR_NO" 
+			WHERE "FILE_NAME"= #file_name# 
+	</select>
+	
+	<!-- DJ_NOCORP -->
+	<select id="LandArchiveDAO.selectNoCorpList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			"KIND_NAME" "문서종류", 
+			"REGIST_NAME" "등록명칭", 
+			"SUBMIT_DATE" "승인날짜", 
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명"
+		FROM "DJ_NOCORP"
+			WHERE "FILE_NAME"= #file_name#
+	</select>
+	
+	<!-- DJ_SPMS -->
+	<select id="LandArchiveDAO.selectSpmsList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT * FROM (
+			SELECT  "KIND_NAME" "문서종류",
+					"KWON_NO" "권번호", 
+					"PAGE_NO" "페이지번호", 
+					"GROUP_NO" "그룹번호", 
+					"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+					"DATA_NAME" "소유자", 
+					"RECEIV_DATE" "신청날짜", 
+					"PATH_NAME" "파일경로", 
+					"FILE_NAME" "파일명" 
+			FROM "DJ_SPMS" 
+				UNION ALL 
+			SELECT "KIND_NAME" "문서종류",
+					"KWON_NO" "권번호", 
+					"PAGE_NO" "페이지번호", 
+					"GROUP_NO" "그룹번호", 
+					"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+					"DATA_NAME" "소유자", 
+					"RECEIV_DATE" "신청날짜", 
+					"PATH_NAME" "파일경로", 
+					"FILE_NAME" "파일명" 
+			FROM "DJ_SPMS_M"
+		) AS foo
+		WHERE "파일명"= #file_name# 
+	</select>
+	
+	<!-- DJ_SURVCHKLIST -->
+	<select id="LandArchiveDAO.selectSurvChkSpmsList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT
+			"KIND_NAME" "문서종류", 
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"SURV_YEAR" "측량년도", 
+			"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명" 
+		FROM "DJ_SURVCHKLIST"
+		WHERE "FILE_NAME"= #file_name#
+	</select>
+	
+	<!-- DJ_TOPOGRAPHIC-->
+	<select id="LandArchiveDAO.selectTopographicList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT
+			"KIND_NAME" "문서종류", 
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"SERIAL_NO" "시리얼번호", 
+			"JIGU_NAME" "지구명", 
+			"DOGNPOINT" "DOGNPOINT", 
+			"BOJOPOINT" "BOJOPOINT", 
+			"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명"
+		FROM "DJ_TOPOGRAPHIC"
+		WHERE "FILE_NAME"= #file_name#
+	</select>
+	
+	<!-- MS_DATA-->
+	<select id="LandArchiveDAO.selectMSDataList" parameterClass="String" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			"KIND_NAME" "문서종류", 
+			"KWON_NO" "권번호", 
+			"PAGE_NO" "페이지번호", 
+			"HJDON_NAME" || ' '|| "JIBUN_DSP" "지번", 
+			"SINGU_NAME" "대장종류", 
+			"PATH_NAME" "파일경로", 
+			"FILE_NAME" "파일명" 
+		FROM "MS_DATA" 
+		WHERE "FILE_NAME"= #file_name# 
+	</select>
+</sqlMap>

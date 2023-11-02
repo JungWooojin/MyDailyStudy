@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>테스트</title>
+    <!-- JS : jQUery 라이브러리 불러들이기 -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <!-- CSS -->
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      ul,
+      li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .wrap {
+        position: relative;
+        display: block;
+        width: 100%;
+      }
+      /* 상단 */
+      .header {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background-color: skyblue;
+      }
+      .main {
+        position: relative;
+        width: 100%;
+        background-color: hotpink;
+        overflow: hidden;
+      }
+      /* 검색 */
+      .search-wrap {
+        position: relative;
+        width: 300px;
+        background-color: yellowgreen;
+        float: left;
+      }
+      .search-form-wrap {
+        position: relative;
+        background-color: greenyellow;
+      }
+      /* 검색 폼 */
+      #search-form {
+        position: relative;
+      }
+      .search-form-list > li {
+        position: relative;
+        overflow: hidden;
+      }
+      .search-form-list > li > label {
+        position: relative;
+        float: left;
+        width: 40%;
+      }
+      .search-form-list > li > input {
+        position: relative;
+        float: right;
+      }
+      /* 검색 결과 리스트 */
+      .search-list-wrap {
+        position: relative;
+        background-color: gold;
+      }
+      /* 검색결과 */
+      .result-wrap {
+        position: relative;
+        width: 200px;
+        background-color: blueviolet;
+        float: left;
+      }
+      .result-detail-wrap {
+        position: relative;
+        background-color: burlywood;
+      }
+      .result-detail-list-wrap {
+        position: relative;
+        background-color: blueviolet;
+      }
+      /* 지도 */
+      .map-wrap {
+        position: relative;
+        width: calc(100% - 500px);
+        background-color: yellow;
+        float: right;
+      }
+      /* 하단 */
+      .footer {
+        position: relative;
+        width: 100%;
+        height: 100px;
+        background-color: green;
+      }
+    </style>
+    <!-- javaScript -->
+    <script>
+      $(document).ready(function () {
+        // 검색 기능
+        const searchForm = $("#search-form");
+        const searchFormWord = $(".search-word");
+      });
+    </script>
+  </head>
+  <body>
+    <!-- 전체레이아웃 -->
+    <div class="wrap">
+      <!-- 상단 -->
+      <header class="header">메뉴</header>
+      <!-- 메인 -->
+      <div class="main">
+        <!-- 왼쪽 검색 -->
+        <div class="search-wrap">
+          <!-- 검색폼 -->
+          <div class="search-form-wrap">
+            <form action="" method="" id="search-form">
+              <ul class="search-form-list">
+                <li>
+                  <label for="search-word">종류</label>
+                  <input type="text" id="search-word" />
+                </li>
+                <li>
+                  <label for="search-address">행정동 주소</label>
+                  <input type="text" id="search-address" />
+                </li>
+                <li>
+                  <label for="search-jibun-1">지번</label>
+                  <input type="text" id="search-jibun-1" />
+                  -
+                  <input type="text" id="search-jibun-2" />
+                </li>
+              </ul>
+            </form>
+          </div>
+          <!-- 검색 결과 -->
+          <div class="search-list-wrap">
+            <h3>검색결과</h3>
+            <div class="search-list">검색결과 목록 출력</div>
+          </div>
+        </div>
+        <!-- 검색 목록 -->
+        <div class="result-wrap">
+          <div class="result-detail-wrap">검색결과 상세내용</div>
+          <div class="result-detail-list-wrap">검색결과 리스트내용</div>
+        </div>
+        <!-- 지도 -->
+        <div class="map-wrap">지도 이미지</div>
+      </div>
+      <!-- 하단 -->
+      <footer class="footer">카피라이터</footer>
+
+      <!-- 팝업창 -->
+      <div class="pop-map-img">이미지 클릭시 보여줄 지도</div>
+    </div>
+  </body>
+</html>
